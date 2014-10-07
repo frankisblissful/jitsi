@@ -25,6 +25,9 @@ public class VlcjMediaPlayerController {
         this.mediaPlayer = mediaPlayer;
     }
 
+    //TODO: default should initialize stuff
+    VlcjMediaPlayerController(){}
+
     public void pause() {
         if (mediaPlayer == null) return;
         mediaPlayer.pause();
