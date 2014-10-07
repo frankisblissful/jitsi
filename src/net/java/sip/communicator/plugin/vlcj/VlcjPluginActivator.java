@@ -23,12 +23,8 @@ public class VlcjPluginActivator implements BundleActivator, MessageListener, Se
      * The logger for this class.
      */
     private static net.java.sip.communicator.util.Logger logger = net.java.sip.communicator.util.Logger.getLogger(VlcjPluginActivator.class);
-    private final VlcjMediaPlayerController mediaPlayerController;
+    private final VlcjMediaPlayerController mediaPlayerController = new VlcjMediaPlayerController();
     private volatile  BundleContext bundleContext = null;
-
-    public VlcjPluginActivator() {
-        mediaPlayerController = new VlcjMediaPlayerController();
-    }
 
     public void start(BundleContext bundleContext) throws Exception {
         this.bundleContext = bundleContext;
@@ -46,25 +42,20 @@ public class VlcjPluginActivator implements BundleActivator, MessageListener, Se
         initalizeProviders();
     }
 
+
     private void initalizeProviders() {
-        // start listening for newly register or removed protocol providers
-        logger.info("start initializeProviders");
         bundleContext.addServiceListener(this);
-        logger.info("added service listener");
         ServiceReference[] protocolProviderRefs;
         try {
             protocolProviderRefs = bundleContext.getServiceReferences(
                     ProtocolProviderService.class.getName(),
                     null);
-        } catch (InvalidSyntaxException ex) {
-            // this shouldn't happen since we're providing no parameter string
-            // but let's log just in case.
+        } catch (Exception ex) {
             logger.error(
                     "Error while retrieving service refs", ex);
             return;
         }
 
-        // in case we found any
         if (protocolProviderRefs != null) {
             if (logger.isDebugEnabled())
                 logger.debug("Found "
@@ -81,19 +72,14 @@ public class VlcjPluginActivator implements BundleActivator, MessageListener, Se
     }
 
     private void handleProviderAdded(ProtocolProviderService provider) {
-        logger.info("Adding protocol provider " + provider.getProtocolName());
-
         // check whether the provider has a basic im operation set
         OperationSetBasicInstantMessaging opSetIm
                 = provider
                 .getOperationSet(OperationSetBasicInstantMessaging.class);
-        logger.info("past getOperationSet");
         if (opSetIm != null) {
-            logger.info("opSetIm is not null, addingMessageListener");
             opSetIm.addMessageListener(this);
-            logger.info("added MessageListener");
         } else {
-                logger.info("Service did not have a im op. set.");
+            logger.info("Service did not have a im op. set.");
         }
     }
 
