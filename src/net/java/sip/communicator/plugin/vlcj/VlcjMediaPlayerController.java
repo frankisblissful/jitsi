@@ -8,25 +8,21 @@ import uk.co.caprica.vlcj.player.embedded.EmbeddedMediaPlayer;
  */
 public class VlcjMediaPlayerController {
 
-    //TODO: should encapsulate the mediaPlayer with api calls
-    //TODO: is mediaPlayer thread safe? (won't matter if we properly encapsulate)
-    //TODO: write an init method that actually creates the VlcjPlayer, don't need to have the VlcjPlayer set this reference....
-    public MediaPlayer getMediaPlayer() {
-        return mediaPlayer;
+
+    private volatile boolean initialized = false;
+
+    //TODO: is mediaPlayer thread safe?
+    private volatile MediaPlayer mediaPlayer = null;
+
+    public void initialize(){
+        VlcjPlayer vlcjPlayer = new VlcjPlayer();
+        mediaPlayer = vlcjPlayer.getMediaPlayer();
+        initialized = true;
     }
 
-    public void setMediaPlayer(EmbeddedMediaPlayer mediaPlayer) {
-        this.mediaPlayer = mediaPlayer;
+    public boolean isInitialized() {
+        return initialized;
     }
-
-    private volatile EmbeddedMediaPlayer mediaPlayer = null;
-
-    VlcjMediaPlayerController(EmbeddedMediaPlayer mediaPlayer) {
-        this.mediaPlayer = mediaPlayer;
-    }
-
-    //TODO: default should initialize stuff
-    VlcjMediaPlayerController(){}
 
     public void pause() {
         if (mediaPlayer == null) return;

@@ -29,7 +29,6 @@ import uk.co.caprica.vlcj.test.basic.EqualizerFrame;
 import uk.co.caprica.vlcj.test.basic.PlayerControlsPanel;
 import uk.co.caprica.vlcj.test.basic.PlayerVideoAdjustPanel;
 
-import javax.swing.*;
 import java.awt.image.BufferedImage;
 import java.io.File;
 
@@ -65,7 +64,6 @@ import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JSeparator;
 import javax.swing.SwingUtilities;
-import javax.swing.Timer;
 
 import uk.co.caprica.vlcj.player.AudioOutput;
 import uk.co.caprica.vlcj.player.Equalizer;
@@ -96,10 +94,8 @@ public class VlcjPlayer {
 
     private Equalizer equalizer;
 
-    private final VlcjMediaPlayerController mediaPlayerController;
 
-    public VlcjPlayer(VlcjMediaPlayerController mediaPlayerController) {
-        this.mediaPlayerController = mediaPlayerController;
+    public VlcjPlayer() {
         videoSurface = new Canvas();
 
         videoSurface.setBackground(Color.black);
@@ -113,7 +109,7 @@ public class VlcjPlayer {
         videoSurface.addMouseListener(mouseListener);
         videoSurface.addMouseMotionListener(mouseListener);
         videoSurface.addMouseWheelListener(mouseListener);
-        videoSurface.addKeyListener(new TestPlayerKeyListener());
+        videoSurface.addKeyListener(new VlcjPlayerKeyListener());
 
         List<String> vlcArgs = new ArrayList<String>();
 
@@ -147,19 +143,18 @@ public class VlcjPlayer {
         Logger.debug("audioOutputs={}", audioOutputs);
 
         mediaPlayer = mediaPlayerFactory.newEmbeddedMediaPlayer(fullScreenStrategy);
-        mediaPlayer.setVideoSurface(mediaPlayerFactory.newVideoSurface(videoSurface));
-        mediaPlayer.setPlaySubItems(true);
+        getMediaPlayer().setVideoSurface(mediaPlayerFactory.newVideoSurface(videoSurface));
+        getMediaPlayer().setPlaySubItems(true);
         String options = formatRtspStream("0.0.0.0", 5555, "demo");
-        mediaPlayer.setStandardMediaOptions(options, ":no-sout-rtp-sap",
+        getMediaPlayer().setStandardMediaOptions(options, ":no-sout-rtp-sap",
                 ":no-sout-standard-sap",
                 ":sout-all",
                 ":sout-keep");
-        mediaPlayer.setEnableKeyInputHandling(false);
-        mediaPlayer.setEnableMouseInputHandling(false);
-        mediaPlayerController.setMediaPlayer(mediaPlayer);
+        getMediaPlayer().setEnableKeyInputHandling(false);
+        getMediaPlayer().setEnableMouseInputHandling(false);
 
-        controlsPanel = new PlayerControlsPanel(mediaPlayer);
-        videoAdjustPanel = new PlayerVideoAdjustPanel(mediaPlayer);
+        controlsPanel = new PlayerControlsPanel(getMediaPlayer());
+        videoAdjustPanel = new PlayerVideoAdjustPanel(getMediaPlayer());
 
         mainFrame.setLayout(new BorderLayout());
         mainFrame.setBackground(Color.black);
@@ -174,8 +169,8 @@ public class VlcjPlayer {
             public void windowClosing(WindowEvent evt) {
                 Logger.debug("windowClosing(evt={})", evt);
 
-                if(mediaPlayer != null) {
-                    mediaPlayer.release();
+                if(getMediaPlayer() != null) {
+                    getMediaPlayer().release();
                     mediaPlayer = null;
                 }
 
@@ -188,7 +183,7 @@ public class VlcjPlayer {
 
         if(mediaPlayerFactory.isEqualizerAvailable()) {
             equalizer = mediaPlayerFactory.newEqualizer();
-            equalizerFrame = new EqualizerFrame(mediaPlayerFactory.getEqualizerBandFrequencies(), mediaPlayerFactory.getEqualizerPresetNames(), mediaPlayerFactory, mediaPlayer, equalizer);
+            equalizerFrame = new EqualizerFrame(mediaPlayerFactory.getEqualizerBandFrequencies(), mediaPlayerFactory.getEqualizerPresetNames(), mediaPlayerFactory, getMediaPlayer(), equalizer);
         }
         else {
             equalizerFrame = null;
@@ -209,40 +204,40 @@ public class VlcjPlayer {
                             mainFrame.validate();
                         }
                         else if(keyEvent.getKeyCode() == KeyEvent.VK_A) {
-                            mediaPlayer.setAudioDelay(mediaPlayer.getAudioDelay() - 50000);
+                            getMediaPlayer().setAudioDelay(getMediaPlayer().getAudioDelay() - 50000);
                         }
                         else if(keyEvent.getKeyCode() == KeyEvent.VK_S) {
-                            mediaPlayer.setAudioDelay(mediaPlayer.getAudioDelay() + 50000);
+                            getMediaPlayer().setAudioDelay(getMediaPlayer().getAudioDelay() + 50000);
                         }
                         // else if(keyEvent.getKeyCode() == KeyEvent.VK_N) {
                         // mediaPlayer.nextFrame();
                         // }
                         else if(keyEvent.getKeyCode() == KeyEvent.VK_1) {
-                            mediaPlayer.setTime(60000 * 1);
+                            getMediaPlayer().setTime(60000 * 1);
                         }
                         else if(keyEvent.getKeyCode() == KeyEvent.VK_2) {
-                            mediaPlayer.setTime(60000 * 2);
+                            getMediaPlayer().setTime(60000 * 2);
                         }
                         else if(keyEvent.getKeyCode() == KeyEvent.VK_3) {
-                            mediaPlayer.setTime(60000 * 3);
+                            getMediaPlayer().setTime(60000 * 3);
                         }
                         else if(keyEvent.getKeyCode() == KeyEvent.VK_4) {
-                            mediaPlayer.setTime(60000 * 4);
+                            getMediaPlayer().setTime(60000 * 4);
                         }
                         else if(keyEvent.getKeyCode() == KeyEvent.VK_5) {
-                            mediaPlayer.setTime(60000 * 5);
+                            getMediaPlayer().setTime(60000 * 5);
                         }
                         else if(keyEvent.getKeyCode() == KeyEvent.VK_6) {
-                            mediaPlayer.setTime(60000 * 6);
+                            getMediaPlayer().setTime(60000 * 6);
                         }
                         else if(keyEvent.getKeyCode() == KeyEvent.VK_7) {
-                            mediaPlayer.setTime(60000 * 7);
+                            getMediaPlayer().setTime(60000 * 7);
                         }
                         else if(keyEvent.getKeyCode() == KeyEvent.VK_8) {
-                            mediaPlayer.setTime(60000 * 8);
+                            getMediaPlayer().setTime(60000 * 8);
                         }
                         else if(keyEvent.getKeyCode() == KeyEvent.VK_9) {
-                            mediaPlayer.setTime(60000 * 9);
+                            getMediaPlayer().setTime(60000 * 9);
                         }
                     }
                 }
@@ -256,7 +251,7 @@ public class VlcjPlayer {
             equalizerFrame.setVisible(true);
         }
 
-        mediaPlayer.addMediaPlayerEventListener(new TestPlayerMediaPlayerEventListener());
+        getMediaPlayer().addMediaPlayerEventListener(new VlcjPlayerMediaPlayerEventListener());
 
         // Won't work with OpenJDK or JDK1.7, requires a Sun/Oracle JVM (currently)
         boolean transparentWindowsSupport = true;
@@ -301,212 +296,6 @@ public class VlcjPlayer {
         // enableMousePointer(false);
     }
 
-    public VlcjPlayer(VlcjMediaPlayerController mediaPlayerController, Object dummy) {
-        this.mediaPlayerController = mediaPlayerController;
-        this.videoSurface = new Canvas();
-
-        //NOTE: moved this from between the videoSurface set up to above it
-        // Since we're mixing lightweight Swing components and heavyweight AWT
-        // components this is probably a good idea
-        JPopupMenu.setDefaultLightWeightPopupEnabled(false);
-        setupVideoSurface();
-        mainFrame = new JFrame("VLCJ Test Player");
-        mainFrame.setIconImage(new ImageIcon(getClass().getResource("/icons/vlcj-logo.png")).getImage());
-        FullScreenStrategy fullScreenStrategy = new DefaultFullScreenStrategy(mainFrame);
-        //QUESTION: is setupMainFrame dependent on this?
-        setupMediaPlayer(fullScreenStrategy);
-
-        controlsPanel = new PlayerControlsPanel(mediaPlayer);
-        videoAdjustPanel = new PlayerVideoAdjustPanel(mediaPlayer);
-
-        mainFrame.setLayout(new BorderLayout());
-        mainFrame.setBackground(Color.black);
-        mainFrame.add(videoSurface, BorderLayout.CENTER);
-        mainFrame.add(controlsPanel, BorderLayout.SOUTH);
-        mainFrame.add(videoAdjustPanel, BorderLayout.EAST);
-        mainFrame.setJMenuBar(buildMenuBar());
-        mainFrame.pack();
-        mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        mainFrame.addWindowListener(new WindowAdapter() {
-            @Override
-            public void windowClosing(WindowEvent evt) {
-                Logger.debug("windowClosing(evt={})", evt);
-
-                if(mediaPlayer != null) {
-                    mediaPlayer.release();
-                    mediaPlayer = null;
-                }
-
-                if(mediaPlayerFactory != null) {
-                    mediaPlayerFactory.release();
-                    mediaPlayerFactory = null;
-                }
-            }
-        });
-
-        if(mediaPlayerFactory.isEqualizerAvailable()) {
-            equalizer = mediaPlayerFactory.newEqualizer();
-            equalizerFrame = new EqualizerFrame(mediaPlayerFactory.getEqualizerBandFrequencies(), mediaPlayerFactory.getEqualizerPresetNames(), mediaPlayerFactory, mediaPlayer, equalizer);
-        }
-        else {
-            equalizerFrame = null;
-        }
-
-        // Global AWT key handler, you're better off using Swing's InputMap and
-        // ActionMap with a JFrame - that would solve all sorts of focus issues too
-        Toolkit.getDefaultToolkit().addAWTEventListener(new AWTEventListener() {
-
-            public void eventDispatched(AWTEvent event) {
-                if(event instanceof KeyEvent) {
-                    KeyEvent keyEvent = (KeyEvent)event;
-                    if(keyEvent.getID() == KeyEvent.KEY_PRESSED) {
-                        if(keyEvent.getKeyCode() == KeyEvent.VK_F12) {
-                            controlsPanel.setVisible(!controlsPanel.isVisible());
-                            videoAdjustPanel.setVisible(!videoAdjustPanel.isVisible());
-                            mainFrame.getJMenuBar().setVisible(!mainFrame.getJMenuBar().isVisible());
-                            mainFrame.invalidate();
-                            mainFrame.validate();
-                        }
-                        else if(keyEvent.getKeyCode() == KeyEvent.VK_A) {
-                            mediaPlayer.setAudioDelay(mediaPlayer.getAudioDelay() - 50000);
-                        }
-                        else if(keyEvent.getKeyCode() == KeyEvent.VK_S) {
-                            mediaPlayer.setAudioDelay(mediaPlayer.getAudioDelay() + 50000);
-                        }
-                        // else if(keyEvent.getKeyCode() == KeyEvent.VK_N) {
-                        // mediaPlayer.nextFrame();
-                        // }
-                        else if(keyEvent.getKeyCode() == KeyEvent.VK_1) {
-                            mediaPlayer.setTime(60000 * 1);
-                        }
-                        else if(keyEvent.getKeyCode() == KeyEvent.VK_2) {
-                            mediaPlayer.setTime(60000 * 2);
-                        }
-                        else if(keyEvent.getKeyCode() == KeyEvent.VK_3) {
-                            mediaPlayer.setTime(60000 * 3);
-                        }
-                        else if(keyEvent.getKeyCode() == KeyEvent.VK_4) {
-                            mediaPlayer.setTime(60000 * 4);
-                        }
-                        else if(keyEvent.getKeyCode() == KeyEvent.VK_5) {
-                            mediaPlayer.setTime(60000 * 5);
-                        }
-                        else if(keyEvent.getKeyCode() == KeyEvent.VK_6) {
-                            mediaPlayer.setTime(60000 * 6);
-                        }
-                        else if(keyEvent.getKeyCode() == KeyEvent.VK_7) {
-                            mediaPlayer.setTime(60000 * 7);
-                        }
-                        else if(keyEvent.getKeyCode() == KeyEvent.VK_8) {
-                            mediaPlayer.setTime(60000 * 8);
-                        }
-                        else if(keyEvent.getKeyCode() == KeyEvent.VK_9) {
-                            mediaPlayer.setTime(60000 * 9);
-                        }
-                    }
-                }
-            }
-        }, AWTEvent.KEY_EVENT_MASK);
-
-        mainFrame.setVisible(true);
-
-        if(mediaPlayerFactory.isEqualizerAvailable()) {
-            equalizerFrame.pack();
-            equalizerFrame.setVisible(true);
-        }
-
-        mediaPlayer.addMediaPlayerEventListener(new TestPlayerMediaPlayerEventListener());
-
-        // Won't work with OpenJDK or JDK1.7, requires a Sun/Oracle JVM (currently)
-        boolean transparentWindowsSupport = true;
-        try {
-            Class.forName("com.sun.awt.AWTUtilities");
-        }
-        catch(Exception e) {
-            transparentWindowsSupport = false;
-        }
-
-        Logger.debug("transparentWindowsSupport={}", transparentWindowsSupport);
-
-        if(transparentWindowsSupport) {
-            final Window test = new Window(null, WindowUtils.getAlphaCompatibleGraphicsConfiguration()) {
-                private static final long serialVersionUID = 1L;
-
-                @Override
-                public void paint(Graphics g) {
-                    Graphics2D g2 = (Graphics2D)g;
-
-                    g2.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-                    g2.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_LCD_HRGB);
-
-                    g.setColor(Color.white);
-                    g.fillRoundRect(100, 150, 100, 100, 32, 32);
-
-                    g.setFont(new Font("Sans", Font.BOLD, 32));
-                    g.drawString("Heavyweight overlay test", 100, 300);
-                }
-            };
-
-            AWTUtilities.setWindowOpaque(test, false); // Doesn't work in full-screen exclusive
-            // mode, you would have to use 'simulated'
-            // full-screen - requires Sun/Oracle JDK
-            test.setBackground(new Color(0, 0, 0, 0)); // This is what you do in JDK7
-
-            // mediaPlayer.setOverlay(test);
-            // mediaPlayer.enableOverlay(true);
-        }
-
-        // This might be useful
-        // enableMousePointer(false);
-    }
-
-    private void setupVideoSurface() {
-
-        videoSurface.setBackground(Color.black);
-        videoSurface.setSize(800, 600); // Only for initial layout
-        VlcjPlayerMouseListener mouseListener = new VlcjPlayerMouseListener();
-        videoSurface.addMouseListener(mouseListener);
-        videoSurface.addMouseMotionListener(mouseListener);
-        videoSurface.addMouseWheelListener(mouseListener);
-        videoSurface.addKeyListener(new TestPlayerKeyListener());
-    }
-
-    private void setupMediaPlayer(FullScreenStrategy fullScreenStrategy) {
-        java.util.List<String> vlcArgs = new ArrayList<String>();
-
-        vlcArgs.add("--no-snapshot-preview");
-        vlcArgs.add("--quiet");
-        vlcArgs.add("--quiet-synchro");
-        vlcArgs.add("--intf");
-        vlcArgs.add("dummy");
-
-        // Special case to help out users on Windows (supposedly this is not actually needed)...
-        // if(RuntimeUtil.isWindows()) {
-        // vlcArgs.add("--plugin-path=" + WindowsRuntimeUtil.getVlcInstallDir() + "\\plugins");
-        // }
-        // else {
-        // vlcArgs.add("--plugin-path=/home/linux/vlc/lib");
-        // }
-
-        // vlcArgs.add("--plugin-path=" + System.getProperty("user.home") + "/.vlcj");
-
-        Logger.debug("vlcArgs={}", vlcArgs);
-
-
-        mediaPlayerFactory = new MediaPlayerFactory(vlcArgs.toArray(new String[vlcArgs.size()]));
-        mediaPlayerFactory.setUserAgent("vlcj test player");
-
-        List<AudioOutput> audioOutputs = mediaPlayerFactory.getAudioOutputs();
-        Logger.debug("audioOutputs={}", audioOutputs);
-
-        mediaPlayer = mediaPlayerFactory.newEmbeddedMediaPlayer(fullScreenStrategy);
-        mediaPlayer.setVideoSurface(mediaPlayerFactory.newVideoSurface(videoSurface));
-        mediaPlayer.setPlaySubItems(true);
-
-        mediaPlayer.setEnableKeyInputHandling(false);
-        mediaPlayer.setEnableMouseInputHandling(false);
-        mediaPlayerController.setMediaPlayer(mediaPlayer);
-    }
 
     private JMenuBar buildMenuBar() {
         // Menus are just added as an example of overlapping the video - they are
@@ -576,30 +365,11 @@ public class VlcjPlayer {
         return menuBar;
     }
 
-
-    /**
-     * Set the standard look and feel.
-     */
-    protected static final void setLookAndFeel() {
-        String lookAndFeelClassName = null;
-        UIManager.LookAndFeelInfo[] lookAndFeelInfos = UIManager.getInstalledLookAndFeels();
-        for(UIManager.LookAndFeelInfo lookAndFeel : lookAndFeelInfos) {
-            if("Nimbus".equals(lookAndFeel.getName())) {
-                lookAndFeelClassName = lookAndFeel.getClassName();
-            }
-        }
-        if(lookAndFeelClassName == null) {
-            lookAndFeelClassName = UIManager.getSystemLookAndFeelClassName();
-        }
-        try {
-            UIManager.setLookAndFeel(lookAndFeelClassName);
-        }
-        catch(Exception e) {
-            // Silently fail, it doesn't matter
-        }
+    public EmbeddedMediaPlayer getMediaPlayer() {
+        return mediaPlayer;
     }
 
-    private final class TestPlayerMediaPlayerEventListener extends MediaPlayerEventAdapter {
+    private final class VlcjPlayerMediaPlayerEventListener extends MediaPlayerEventAdapter {
         @Override
         public void mediaChanged(MediaPlayer mediaPlayer, libvlc_media_t media, String mrl) {
             Logger.debug("mediaChanged(mediaPlayer={},media={},mrl={})", mediaPlayer, media, mrl);
@@ -790,7 +560,7 @@ public class VlcjPlayer {
     /**
      *
      */
-    private final class TestPlayerKeyListener extends KeyAdapter {
+    private final class VlcjPlayerKeyListener extends KeyAdapter {
 
         @Override
         public void keyPressed(KeyEvent e) {
@@ -810,7 +580,7 @@ public class VlcjPlayer {
 
     private static String formatRtspStream(String serverAddress, int serverPort, String id) {
         StringBuilder sb = new StringBuilder(60);
-        sb.append(":sout=#transcode{vcodec=h264,scale=0.5,audio-sync}:duplicate{dst=display,dst=rtp{sdp=rtsp://@");
+        sb.append(":sout=#duplicate{dst=display,dst=rtp{sdp=rtsp://@");
         sb.append(serverAddress);
         sb.append(':');
         sb.append(serverPort);
@@ -819,5 +589,4 @@ public class VlcjPlayer {
         sb.append("}");
         return sb.toString();
     }
-    private final String vlcOptions = ":sout=#transcode{vcodec=h264,scale=0.25,acodec=mpga,ab=128,channels=2,samplerate=44100,audio-sync} :sout-all :sout-keep";
 }

@@ -39,26 +39,11 @@ public class VlcjPluginActivator implements BundleActivator, MessageListener, Se
         Logger.info("changeset: {}", libVlc.libvlc_get_changeset());
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
-                new VlcjPlayer(mediaPlayerController);
+                mediaPlayerController.initialize();
             }
         });
         java.util.Timer timer = new Timer();
         initalizeProviders();
-    }
-
-
-    private void schedulePause(final VlcjMediaPlayerController mediaPlayerController, Timer timer) {
-        TimerTask task = new TimerTask() {
-            @Override
-            public void run() {
-                try {
-                    mediaPlayerController.pause();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
-            }
-        };
-        timer.schedule(task, 0, 10000);
     }
 
     private void initalizeProviders() {
